@@ -3,30 +3,23 @@ Please provide us with the following information:
 
   your name: Yuqing Zhai
   
-  which homeork assignment/problem this code is for: Homework 2
+  which homework assignment/problem this code is for: Homework 3
   
-  today's date: Sep. 8st 2022
+  today's date: Sep. 15st 2022
   
   name of this file: phys371_hw3_yuqing
 
-  goal/purpose of this program: 
-    (1) display the input of keypad on lcd (except #)
-    (2) display time from RST on keypad when receive ** input 
-    (3) write (time, line number) pair to sd card when receive *** input
-    (4) end the program when receive **** input
-    (5) notice, the (#) is used like "Enter" on keyboard, it could not be displayed on the keyboard
+  goal/purpose of this program:
+    (1) measure acceleration & force
+    (2) output the data to SD card and serial.
   
-  approximate time spent on this assignment/problem: 17 hours
+  approximate time spent on this assignment/problem: 8 hours
 
   students with whom you worked while developing this code: N/A
   
   references you used in developing your code: 
-    Example > Adafruit BME680 Library > bme680test
-    Arduino Documentation : https://docs.arduino.cc/learn/electronics/lcd-displays
-    Example > Adafruit Keypad > keypad_test
-    Example > SdFat > ExampleV1 > ReadWrite
-    Example > RTClib > toString
-    Class Webpage > Repository > File "Here is the code I used to check the PCBs before distributing them"
+    https://cdn-learn.adafruit.com/downloads/pdf/adafruit-lsm9ds1-accelerometer-plus-gyro-plus-magnetometer-9-dof-breakout.pdf
+    https://arduinogetstarted.com/tutorials/arduino-force-sensor
 */
 
 //////////////////////////////////////////////////////////////////////////////////////
