@@ -88,6 +88,7 @@ void setup()
   }
 
   Serial.println("I am here!");
+  digitalWrite(LED_BUILTIN, HIGH);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -107,47 +108,46 @@ void loop()
   auto ay = a.acceleration.y;
   auto az = a.acceleration.z;
 
-  Serial.print(now);
-  Serial.print(" ");
-  Serial.print(" ax: ");
-  Serial.print(ax);
-  Serial.print(" ay: ");
-  Serial.print(ay);
-  Serial.print(" az: ");
-  Serial.print(az);
+  // Serial.print(now);
+  // Serial.print(" ");
+  // Serial.print(" ax: ");
+  // Serial.print(ax);
+  // Serial.print(" ay: ");
+  // Serial.print(ay);
+  // Serial.print(" az: ");
+  // Serial.print(az);
   
-  buffer += String(now) + " " + ax + " " + ay + " " + az + " ";
+  buffer += String(now) + " " + ax + " " + ay + " " + az + " \n";
 
   // now get the resistor reading 
 
-  double percentage = analogRead(fsrPin) / 1023.0;
+  // double percentage = analogRead(fsrPin) / 1023.0;
   
   // FSR = R * (1 / p - 1)
 
-  if (percentage == 0) {
-    Serial.print(" F: 0 N");
-    buffer += "0";
-  } else {
-    double fsr = resistance * (1 / percentage - 1);
-    double fsr_conductance = 1000000.0 / fsr;
-    double fsr_force = fsr_conductance <= 1000
-      ? fsr_conductance / 80.0 
-      : (fsr_conductance - 1000.0) / 30.0;
+  // if (percentage == 0) {
+  //   Serial.print(" F: 0 N");
+  //   buffer += "0";
+  // } else {
+  //   double fsr = resistance * (1 / percentage - 1);
+  //   double fsr_conductance = 1000000.0 / fsr;
+  //   double fsr_force = fsr_conductance <= 1000
+  //     ? fsr_conductance / 80.0 
+  //     : (fsr_conductance - 1000.0) / 30.0;
 
-    Serial.print(" F:");
-    Serial.print(fsr_force);
-    buffer += fsr_force;
-  }
+  //   Serial.print(" F:");
+  //   Serial.print(fsr_force);
+  //   buffer += fsr_force;
+  // }
 
-
-  Serial.println();
-  buffer += '\n';
+  // Serial.println();
+  // buffer += '\n';
 
   unsigned int chunkSize = outFile.availableForWrite();
   if (chunkSize && buffer.length() >= chunkSize) {
-    digitalWrite(LED_BUILTIN, HIGH);
+    // digitalWrite(LED_BUILTIN, HIGH);
     outFile.write(buffer.c_str(), chunkSize);
-    digitalWrite(LED_BUILTIN, LOW);
+    // digitalWrite(LED_BUILTIN, LOW);
 
     buffer.remove(0, chunkSize);
   }
@@ -158,7 +158,7 @@ void loop()
 // other functions can go here.
 
 void setupAccelerometer() {
-  lsm.setupAccel(lsm.LSM9DS1_ACCELRANGE_2G);
+  lsm.setupAccel(lsm.LSM9DS1_ACCELRANGE_16G);
   lsm.setupMag(lsm.LSM9DS1_MAGGAIN_4GAUSS);
   lsm.setupGyro(lsm.LSM9DS1_GYROSCALE_245DPS);
 }
