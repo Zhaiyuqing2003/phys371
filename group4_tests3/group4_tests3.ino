@@ -50,15 +50,15 @@ struct offset_t {
 };
 
 struct data_t {
-  unsigned long time;
-  float ax, ay, az;
-  long flag;
+  unsigned long time = 0UL;
+  float ax_lsm = 0.0f, ay_lsm = 0.0f, az_lsm = 0.0f;
+  float ax_lis = 0.0f, ay_lis = 0.0f, az_lis = 0.0f;
 };
 
 // CONSTANTS
 const int LED_GREEN_PIN = 8;
 const int LED_RED_PIN = 13;
-const int LOOPS = 10000;
+const int LOOPS = 300000; // 5 minutes
 
 //////////////////////// SD card parameters /////////////////////////
 #define SD_PIN 4
@@ -66,7 +66,9 @@ const int LOOPS = 10000;
 
 Sd2Card card;
 File file;
-const char FILE_NAME[10] = "FALL.TXT";
+File count_file;
+String FILE_NAME;
+const char COUNT_FILE_NAME[15] = "COUNT.TXT";
 
 // buffers for non-blocking write
 char buffer[sizeof(data_t) * 512];
@@ -104,16 +106,14 @@ void setup() {
   open_file();
 
   // offset test
-  offset_test(1000);
+  offset_test(5000);
+  blink(5000, 100);
 }
 
 void loop() {
-  static bool using_lsm = true;
-  static float ax = 0.0f;
-  static float ay = 0.0f;
-  static float az = 0.0f;
   static char* buffer_ptr = buffer;
   static int index = 0;
+  static data_t data;
 
   unsigned long micros_now = micros();
 
@@ -121,65 +121,85 @@ void loop() {
     // just close the file and stop
     file.close();
     while (1) {
-      blink(1000, 100);
+      blink(10000, 100);
     }
   } else {
     index ++;
   }
 
-  if (using_lsm) {
-    sensors_event_t accel, mag, gyro, temp;
+  // // if (using_lsm) {
+  sensors_event_t accel, mag, gyro, temp;
+  delay_lsm();
 
-    delay_lsm();
+  lsm.getEvent(&accel, &mag, &gyro, &temp);
+  lsm.readAccel();
 
-    lsm.getEvent(&accel, &mag, &gyro, &temp);
-    lsm.readAccel();
+  data.time = micros_now;
+  data.ax_lsm = float(accel.acceleration.x);
+  data.ay_lsm = float(accel.acceleration.y);
+  data.az_lsm = float(accel.acceleration.z);
 
-    ax = float(accel.acceleration.x);
-    ay = float(accel.acceleration.y);
-    az = float(accel.acceleration.z);
+  // } else {
+  sensors_event_t accel_two;
+  delay_lis();
 
-    if (ax > LSM9DS1_SATURATION || ay > LSM9DS1_SATURATION || az > LSM9DS1_SATURATION) {
-      Serial.println("Switching to H3LIS331");
-      using_lsm = false;
-    }
-  } else {
-    sensors_event_t accel;
-    delay_lis();
+  lis.getEvent(&accel_two);
 
-    lis.getEvent(&accel);
-
-    ax = float(accel.acceleration.x);
-    ay = float(accel.acceleration.y);
-    az = float(accel.acceleration.z);
-
-    if (ax < LSM9DS1_SATURATION && ay < LSM9DS1_SATURATION && az < LSM9DS1_SATURATION) {
-      Serial.println("Switching to LSM9DS1");
-      using_lsm = true;
-    }
-  }
-
-  // write to buffer
-  data_t data = {
-    micros_now,
-    ax, ay, az,
-    using_lsm ? 1 : 0
-  };
+  data.ax_lis = float(accel_two.acceleration.x);
+  data.ay_lis = float(accel_two.acceleration.y);
+  data.az_lis = float(accel_two.acceleration.z);
 
   memcpy(buffer_ptr, &data, sizeof(data_t));
   buffer_ptr += sizeof(data_t);
 
   // write to file
+  // unsigned int chunkSize = file.availableForWrite();
+
   if (buffer_ptr - buffer >= sizeof(buffer)) {
     Serial.println("Writing to file... ");
     file.write(buffer, sizeof(buffer));
+    file.close();
+    file = SD.open(FILE_NAME, FILE_WRITE);
     buffer_ptr = buffer;
   }
 }
 
 void open_file() {
-  Serial.println("---------- Opening file ----------");
+  Serial.println("---------- Opening Count File ----------");
 
+  if (!SD.exists(COUNT_FILE_NAME)) {
+    count_file = SD.open(COUNT_FILE_NAME, FILE_WRITE);
+    count_file.print("0");
+    count_file.close();
+  }
+
+  count_file = SD.open(COUNT_FILE_NAME);
+
+  String count_string = "";
+
+  if (count_file) {
+    while (count_file.available()) {
+      Serial.println("Am I here?");
+      count_string += (char)count_file.read();
+    }
+  }
+
+  int count = count_string.toInt();
+
+  Serial.println(count_string);
+  Serial.println(count);
+
+  count_file.close();
+
+  SD.remove(COUNT_FILE_NAME);
+  count_file = SD.open(COUNT_FILE_NAME, FILE_WRITE);
+  count_file.print(String(count + 1));
+  count_file.close();
+
+  Serial.println("---------- Opening File ----------");
+
+  FILE_NAME = String("FILE") + count + ".TXT";
+  
   if (SD.exists(FILE_NAME)) {
     Serial.println("File exists, deleting...");
     SD.remove(FILE_NAME);

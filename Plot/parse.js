@@ -38,18 +38,34 @@ Plotly.newPlot('Accel X', [{
     x: obj.map(line => line[0] / 1_000_000),
     y: obj.map(line => line[1] - lsm.ax),
     type: 'scatter',
+    mode: 'lines',
     // mode: 'markers',
-    name: 'Accel X'
+    name: 'Accel X (LSM)'
 }, {
     x: obj.map(line => line[0] / 1_000_000),
     y: obj.map(line => line[2] - lsm.ay),
     type: 'scatter',
-    name: 'Accel Y'
+    name: 'Accel Y (LSM)'
 }, {
     x: obj.map(line => line[0] / 1_000_000),
     y: obj.map(line => line[3] - lsm.az),
     type: 'scatter',
-    name : 'Accel Z'
+    name : 'Accel Z (LSM)'
+}, {
+    x: obj.map(line => line[0] / 1_000_000),
+    y: obj.map(line => line[4] - lis.ax),
+    type: 'scatter',
+    name : 'Accel X (LIS)'
+}, {
+    x: obj.map(line => line[0] / 1_000_000),
+    y: obj.map(line => line[5] - lis.ay),
+    type: 'scatter',
+    name : 'Accel Y (LIS)'
+}, {
+    x: obj.map(line => line[0] / 1_000_000),
+    y: obj.map(line => line[6] - lis.az),
+    type: 'scatter',
+    name : 'Accel Z (LIS)'
 }], {
     xaxis : {
         title: 'Time (s)',
